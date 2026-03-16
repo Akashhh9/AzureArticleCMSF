@@ -12,8 +12,10 @@ from flask_login import current_user, login_user, logout_user, login_required
 from FlaskWebProject.models import User, Post
 import msal
 import uuid
+import logging
 
 imageSourceUrl = 'https://'+ app.config['BLOB_ACCOUNT']  + '.blob.core.windows.net/' + app.config['BLOB_CONTAINER']  + '/'
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 @app.route('/home')
@@ -66,12 +68,12 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            app.logger.warning("Invalid login attempt")
+            logging.error("Invalid username or password.")
             flash('Invalid username or password')
             return redirect(url_for('login'))
 
+        logging.info("The User logged successfully.")
         login_user(user, remember=form.remember_me.data)
-        app.logger.info("admin logged in successfully")
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
